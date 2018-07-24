@@ -23,24 +23,24 @@ gpt_header = read_sector(f, gpt_start)
 if struct.unpack_from("<8s", gpt_header, 0)[0]!= b'EFI PART' :
     print("no gpt")
 
-PartEntry_start = struct.unpack_from("<Q", gpt_header, 72)[0]
+part_entry_start = struct.unpack_from("<Q", gpt_header, 72)[0]
 PartEntry_count = struct.unpack_from("<I", gpt_header, 80)[0]
 
-Partition_list = []
+partition_list = []
 for idx in range(PartEntry_count):
-    PartEntry = read_sector(f, PartEntry_start + idx)
-    for Entry_idx in range(4):
-        Entry = PartEntry[Entry_idx * 128:(Entry_idx + 1) * 128]
-        EntryStart = struct.unpack_from("<Q", Entry, 32)[0]
-        EntryLast = struct.unpack_from("<Q", Entry, 40)[0]
+    part_entry = read_sector(f, part_entry_start + idx)
+    for entry_idx in range(4):
+        entry = part_entry[entry_idx * 128:(entry_idx + 1) * 128]
+        entry_start = struct.unpack_from("<Q", entry, 32)[0]
+        entry_last = struct.unpack_from("<Q", entry, 40)[0]
 
         flag = False
-        if EntryStart == 0:
+        if entry_start == 0:
             flag = True
             break
-        Partition_list.append([EntryStart, EntryLast - EntryStart+1])
-        Partition_list[-1] = [i*512 for i in Partition_list[-1]]
+        partition_list.append([entry_start, entry_last - entry_start+1])
+        partition_list[-1] = [i*512 for i in partition_list[-1]]
     if flag:
         break
-for i in range(len(Partition_list)):
-    print("Partition" + str(i+1) + "    StartAt:" + str(Partition_list[i][0]) + "      Size:" + str(Partition_list[i][1]))
+for i in range(len(partition_list)):
+    print("Partition" + str(i+1) + "    StartAt:" + str(partition_list[i][0]) + "      Size:" + str(partition_list[i][1]))
